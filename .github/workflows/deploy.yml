@@ -7,13 +7,19 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    container: ghcr.io/railwayapp/cli:latest  # Official Railway CLI Docker image
+    container: ghcr.io/railwayapp/cli:latest
     env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}  # Your pre-configured token secret
-      SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}  # Your pre-configured service ID secret
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Latest version for security and performance
+        uses: actions/checkout@v4
+
+      - name: Verify Railway CLI and Token
+        run: |
+          railway --version
+          if [ -z "$RAILWAY_TOKEN" ]; then echo "RAILWAY_TOKEN is not set"; exit 1; fi
+          echo "RAILWAY_TOKEN is set (length: ${#RAILWAY_TOKEN})"
 
       - name: Deploy to Railway
-        run: railway up --service=${{ env.SERVICE_ID }}  # Deploys your FastAPI app to the specified service
+        run: railway up --service=${{ env.SERVICE_ID }}
