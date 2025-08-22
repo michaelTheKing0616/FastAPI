@@ -4,7 +4,6 @@ Assembles FastAPI app and includes all routers.
 """
 
 from fastapi import FastAPI
-from .routes import account
 from .routes import account, web_delete
 
 
