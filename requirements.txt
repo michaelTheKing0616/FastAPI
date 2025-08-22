@@ -5,4 +5,4 @@ python-jose[cryptography]>=3.3.0
 asyncpg>=0.27.0
 databases>=0.7.0
 sqlalchemy>=2.0.0
-# Updated 2025-08-22
+psycopg2-binary>=2.9.0
