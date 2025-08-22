@@ -1,27 +1,42 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from app.core.config import database  # Import the database instance
+from app.core.config import database
+from python_jose import jwt, JWTError
+import os
 
 router = APIRouter()
+security = HTTPBearer()
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key")  # Load from env var
+ALGORITHM = "HS256"
 
 class DeleteRequest(BaseModel):
     user_id: str
 
-# Mock authentication (replace with JWT or API key in production)
-async def verify_user(user_id: str):
-    # Query the database to verify user exists
-    query = "SELECT id, name FROM users WHERE id = :user_id"
-    user = await database.fetch_one(query=query, values={"user_id": user_id})
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized or user not found")
-    return user_id
+async def verify_user(credentials: HTTPAuthorizationCredentials = Security(security)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        query = "SELECT id, name FROM users WHERE id = :user_id"
+        user = await database.fetch_one(query=query, values={"user_id": user_id})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user_id
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.post("/delete", summary="Delete user account")
 async def delete_account(request: DeleteRequest, user_id: str = Depends(verify_user)):
     """
     Deletes a user account for Play Store compliance.
-    Uses PostgreSQL for persistent storage.
+    Uses PostgreSQL and JWT authentication.
     """
+    if request.user_id != user_id:
+        raise HTTPException(status_code=403, detail="User ID mismatch")
     query = "DELETE FROM users WHERE id = :user_id RETURNING id, name"
     deleted_user = await database.fetch_one(query=query, values={"user_id": user_id})
     if not deleted_user:
