@@ -26,3 +26,4 @@ ENV PYTHONPATH=/app
 
 # Run database initialization and app
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+#2025-08-22
