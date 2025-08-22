@@ -1,20 +1,18 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from app.core.config import database  # Import the database instance
 
 router = APIRouter()
-
-# Temporary in-memory users (replace with DB later)
-fake_users_db = {
-    "123": {"id": "123", "name": "Test User"},
-    "456": {"id": "456", "name": "Another User"},
-}
 
 class DeleteRequest(BaseModel):
     user_id: str
 
 # Mock authentication (replace with JWT or API key in production)
 async def verify_user(user_id: str):
-    if user_id not in fake_users_db:
+    # Query the database to verify user exists
+    query = "SELECT id, name FROM users WHERE id = :user_id"
+    user = await database.fetch_one(query=query, values={"user_id": user_id})
+    if not user:
         raise HTTPException(status_code=401, detail="Unauthorized or user not found")
     return user_id
 
@@ -22,7 +20,10 @@ async def verify_user(user_id: str):
 async def delete_account(request: DeleteRequest, user_id: str = Depends(verify_user)):
     """
     Deletes a user account for Play Store compliance.
-    In production, connect to a database and validate auth.
+    Uses PostgreSQL for persistent storage.
     """
-    deleted_user = fake_users_db.pop(user_id)
-    return {"status": "success", "deleted_user": deleted_user}
+    query = "DELETE FROM users WHERE id = :user_id RETURNING id, name"
+    deleted_user = await database.fetch_one(query=query, values={"user_id": user_id})
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"status": "success", "deleted_user": {"id": deleted_user["id"], "name": deleted_user["name"]}}
