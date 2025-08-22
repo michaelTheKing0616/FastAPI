@@ -15,11 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Railway CLI and Token
-        run: |
-          railway --version
-          if [ -z "$RAILWAY_TOKEN" ]; then echo "RAILWAY_TOKEN is not set"; exit 1; fi
-          echo "RAILWAY_TOKEN is set (length: ${#RAILWAY_TOKEN})"
+      - name: Verify Railway CLI
+        run: railway --version
 
       - name: Deploy to Railway
         run: railway up --service=${{ env.SERVICE_ID }}
