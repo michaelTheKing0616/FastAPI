@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -8,14 +9,20 @@ fake_users_db = {
     "456": {"id": "456", "name": "Another User"},
 }
 
-@router.delete("/{user_id}", summary="Delete user account")
-async def delete_account(user_id: str):
-    """
-    Deletes a user account.
-    In production, this will connect to your database.
-    """
-    if user_id not in fake_users_db:
-        raise HTTPException(status_code=404, detail="User not found")
+class DeleteRequest(BaseModel):
+    user_id: str
 
+# Mock authentication (replace with JWT or API key in production)
+async def verify_user(user_id: str):
+    if user_id not in fake_users_db:
+        raise HTTPException(status_code=401, detail="Unauthorized or user not found")
+    return user_id
+
+@router.post("/delete", summary="Delete user account")
+async def delete_account(request: DeleteRequest, user_id: str = Depends(verify_user)):
+    """
+    Deletes a user account for Play Store compliance.
+    In production, connect to a database and validate auth.
+    """
     deleted_user = fake_users_db.pop(user_id)
     return {"status": "success", "deleted_user": deleted_user}
