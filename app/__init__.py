@@ -5,6 +5,8 @@ Assembles FastAPI app and includes all routers.
 
 from fastapi import FastAPI
 from .routes import account
+from .routes import account, web_delete
+
 
 # Create FastAPI instance
 app = FastAPI(
@@ -15,6 +17,7 @@ app = FastAPI(
 
 # Routers
 app.include_router(account.router, prefix="/account", tags=["Account"])
+app.include_router(web_delete.router)
 
 @app.get("/", tags=["Health"])
 async def root():
