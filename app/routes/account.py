@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from app.core.config import database
-from python_jose import jwt, JWTError
+from jose import jwt, JWTError
 import os
 
 router = APIRouter()
