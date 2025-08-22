@@ -25,4 +25,4 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Run database initialization and app
-CMD ["/bin/sh", "-c", "python app/db/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
