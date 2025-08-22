@@ -1,9 +1,12 @@
-"""
-Entrypoint for running the FastAPI app.
-This is what uvicorn will point to.
-"""
+from fastapi import FastAPI
+from app.core.config import database
 
-from app import app
+app = FastAPI()
 
-# Nothing else needed — uvicorn will import `app` from here.
-# Example: uvicorn app.main:app --reload
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
