@@ -22,5 +22,5 @@ COPY . .
 # Environment
 ENV PYTHONPATH=/app
 
-# Run database initialization + start FastAPI
-CMD python app/db/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Start FastAPI (DB init is already inside lifespan in main.py)
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
