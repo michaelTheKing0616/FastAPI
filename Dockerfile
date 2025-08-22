@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip show python-jose || { echo "python-jose not installed"; exit 1; }
 
 # Copy project files
 COPY . .
