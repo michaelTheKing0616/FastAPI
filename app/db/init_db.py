@@ -9,7 +9,6 @@ async def init_db():
     );
     """
     await database.execute(query=query)
-    # Insert test data
     await database.execute(
         query="INSERT INTO users (id, name) VALUES (:id, :name) ON CONFLICT DO NOTHING",
         values=[{"id": "123", "name": "Test User"}, {"id": "456", "name": "Another User"}]
